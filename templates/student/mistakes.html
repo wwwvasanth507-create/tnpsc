@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Mistake Revision Bank{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100 flex items-center space-x-2">
+            <span>Mistake Revision Bank</span>
+            <span class="badge badge-rose font-bold text-xs">{{ unresolved_mistakes|length }} Pending</span>
+        </h1>
+        <p class="text-sm text-slate-400 mt-1">Questions you answered incorrectly during quizzes are saved here automatically for targeted revision.</p>
+    </div>
+
+    <!-- Active Mistakes -->
+    <div class="space-y-4">
+        <h2 class="text-lg font-bold text-slate-200">Unresolved Questions</h2>
+        {% for m in unresolved_mistakes %}
+            <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="badge badge-indigo">{{ m.question.subject.name if m.question.subject else 'General' }}</span>
+                    <span class="text-slate-400">Added: {{ m.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+
+                <div class="text-base font-semibold text-slate-100">
+                    {{ m.question.question_text }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                    <div class="p-2.5 rounded-lg border {% if m.question.correct_option == 'A' %}border-emerald-500/50 bg-emerald-950/20 text-emerald-300 font-bold{% elif m.user_wrong_option == 'A' %}border-rose-500/50 bg-rose-950/20 text-rose-300{% else %}border-slate-800 text-slate-400{% endif %}">
+                        A) {{ m.question.option_a }}
+                    </div>
+                    <div class="p-2.5 rounded-lg border {% if m.question.correct_option == 'B' %}border-emerald-500/50 bg-emerald-950/20 text-emerald-300 font-bold{% elif m.user_wrong_option == 'B' %}border-rose-500/50 bg-rose-950/20 text-rose-300{% else %}border-slate-800 text-slate-400{% endif %}">
+                        B) {{ m.question.option_b }}
+                    </div>
+                    <div class="p-2.5 rounded-lg border {% if m.question.correct_option == 'C' %}border-emerald-500/50 bg-emerald-950/20 text-emerald-300 font-bold{% elif m.user_wrong_option == 'C' %}border-rose-500/50 bg-rose-950/20 text-rose-300{% else %}border-slate-800 text-slate-400{% endif %}">
+                        C) {{ m.question.option_c }}
+                    </div>
+                    <div class="p-2.5 rounded-lg border {% if m.question.correct_option == 'D' %}border-emerald-500/50 bg-emerald-950/20 text-emerald-300 font-bold{% elif m.user_wrong_option == 'D' %}border-rose-500/50 bg-rose-950/20 text-rose-300{% else %}border-slate-800 text-slate-400{% endif %}">
+                        D) {{ m.question.option_d }}
+                    </div>
+                </div>
+
+                {% if m.question.explanation %}
+                <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800/80 text-xs text-slate-300">
+                    <strong class="text-indigo-400 block mb-1">Explanation:</strong>
+                    {{ m.question.explanation }}
+                </div>
+                {% endif %}
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                    <span class="text-xs text-rose-400">Your choice: {{ m.user_wrong_option or 'None' }} &bull; Correct: {{ m.question.correct_option }}</span>
+                    <form action="{{ url_for('student.resolve_mistake', mistake_id=m.id) }}" method="POST">
+                        <button type="submit" class="btn btn-outline-success btn-sm">Mark as Mastered ✓</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="card p-8 text-center text-slate-400">
+                🎉 No unresolved mistakes! Excellent preparation accuracy.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

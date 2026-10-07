@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Manage Students{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100">Student Directory</h1>
+        <p class="text-sm text-slate-400 mt-1">View registered student accounts, activity, and manage access.</p>
+    </div>
+
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Username</th>
+                        <th>Email Address</th>
+                        <th>Joined Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for st in students %}
+                    <tr>
+                        <td class="font-bold text-slate-100">{{ st.full_name }}</td>
+                        <td class="font-mono text-indigo-400 text-xs">{{ st.username }}</td>
+                        <td class="text-slate-300 text-xs">{{ st.email }}</td>
+                        <td class="text-xs text-slate-400">{{ st.created_at.strftime('%b %d, %Y') if st.created_at else '-' }}</td>
+                        <td>
+                            {% if st.is_active %}<span class="badge badge-emerald">Active</span>{% else %}<span class="badge badge-rose">Deactivated</span>{% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('admin.toggle_student', student_id=st.id) }}" method="POST">
+                                <button type="submit" class="btn {% if st.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} btn-sm">
+                                    {% if st.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No student accounts registered yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

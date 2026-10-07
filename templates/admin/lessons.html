@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Manage Lessons{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Lesson Management</h1>
+            <p class="text-sm text-slate-400 mt-1">Create concept explanations, examples, key points, and memory tricks.</p>
+        </div>
+        <button type="button" onclick="openModal('add-lesson-modal')" class="btn btn-primary font-bold">
+            + Create New Lesson
+        </button>
+    </div>
+
+    <!-- Lessons Table -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Order</th>
+                        <th>Lesson Title</th>
+                        <th>Est. Mins</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for les in lessons %}
+                    <tr>
+                        <td><span class="badge badge-indigo text-xs font-bold">{{ les.topic.title if les.topic else 'None' }}</span></td>
+                        <td class="font-mono text-slate-400">{{ les.order_index }}</td>
+                        <td>
+                            <div class="font-bold text-slate-100">{{ les.title }}</div>
+                            <div class="text-xs text-slate-400 line-clamp-1">{{ les.content_summary }}</div>
+                        </td>
+                        <td class="text-xs text-slate-300 font-semibold">{{ les.estimated_minutes }} m</td>
+                        <td>
+                            {% if les.is_active %}<span class="badge badge-emerald">Active</span>{% else %}<span class="badge badge-rose">Inactive</span>{% endif %}
+                        </td>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ url_for('lessons.detail', lesson_id=les.id) }}" class="btn btn-ghost btn-sm" target="_blank">Preview</a>
+                                <form action="{{ url_for('admin.delete_lesson', lesson_id=les.id) }}" method="POST" onsubmit="return confirm('Delete this lesson?')">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No lessons created yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Lesson -->
+<div id="add-lesson-modal" class="modal-backdrop hidden">
+    <div class="modal-card max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-bold text-slate-100">Create New Lesson</h3>
+            <button type="button" onclick="closeModal('add-lesson-modal')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        </div>
+        <form action="{{ url_for('admin.lessons') }}" method="POST" class="space-y-4 mt-4 text-xs">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Parent Topic</label>
+                    <select name="topic_id" class="form-input text-xs" required>
+                        {% for top in topics %}
+                        <option value="{{ top.id }}">{{ top.title }} ({{ top.subject.name if top.subject else '' }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Lesson Title</label>
+                    <input type="text" name="title" class="form-input text-xs" placeholder="e.g. Introduction to Constitution" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">Content Summary (Short overview)</label>
+                <input type="text" name="content_summary" class="form-input text-xs" placeholder="Short description...">
+            </div>
+
+            <div>
+                <label class="form-label">Concept Explanation Body (HTML / Text)</label>
+                <textarea name="concept_body" class="form-input text-xs font-mono" rows="6" placeholder="<p>Detailed concept explanation...</p>" required></textarea>
+            </div>
+
+            <div>
+                <label class="form-label">Examples</label>
+                <textarea name="examples" class="form-input text-xs" rows="2" placeholder="Real-world or simple examples..."></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Key Important Points (Bullet points)</label>
+                    <textarea name="important_points" class="form-input text-xs font-mono" rows="3" placeholder="• Point 1&#10;• Point 2"></textarea>
+                </div>
+                <div>
+                    <label class="form-label">Memory Tricks / Mnemonics</label>
+                    <textarea name="memory_tricks" class="form-input text-xs" rows="3" placeholder="Admin created memory trick..."></textarea>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Estimated Minutes</label>
+                    <input type="number" name="estimated_minutes" class="form-input text-xs" value="15" required>
+                </div>
+                <div>
+                    <label class="form-label">Display Order</label>
+                    <input type="number" name="order_index" class="form-input text-xs" value="1" required>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeModal('add-lesson-modal')" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Publish Lesson</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

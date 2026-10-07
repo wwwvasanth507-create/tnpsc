@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Manage Roadmap{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Roadmap Curriculum System</h1>
+            <p class="text-sm text-slate-400 mt-1">Configure year-by-year and month-by-month study targets for aspirants.</p>
+        </div>
+        <button type="button" onclick="openModal('add-roadmap-modal')" class="btn btn-primary font-bold">
+            + Add Roadmap Target
+        </button>
+    </div>
+
+    <!-- Roadmap Table -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Timeline</th>
+                        <th>Target Title</th>
+                        <th>Subject / Lesson</th>
+                        <th>Est. Time</th>
+                        <th>Priority</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>
+                            <span class="badge badge-indigo font-bold text-xs">Y{{ item.year }} M{{ item.month }}</span>
+                        </td>
+                        <td>
+                            <div class="font-bold text-slate-100 text-sm">{{ item.title }}</div>
+                            <div class="text-xs text-slate-400 line-clamp-1">{{ item.description }}</div>
+                        </td>
+                        <td>
+                            <div class="text-xs text-slate-200 font-semibold">{{ item.subject.name if item.subject else 'General' }}</div>
+                            <div class="text-xs text-slate-400">{{ item.lesson.title if item.lesson else '' }}</div>
+                        </td>
+                        <td class="text-xs text-slate-300 font-mono">{{ item.estimated_study_time }}</td>
+                        <td>
+                            <span class="badge {% if item.priority == 'high' %}badge-rose{% elif item.priority == 'medium' %}badge-amber{% else %}badge-slate{% endif %} text-xs uppercase">
+                                {{ item.priority }}
+                            </span>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('admin.delete_roadmap', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete roadmap item?')">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No roadmap items configured.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Roadmap Item -->
+<div id="add-roadmap-modal" class="modal-backdrop hidden">
+    <div class="modal-card max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-bold text-slate-100">Create Roadmap Target</h3>
+            <button type="button" onclick="closeModal('add-roadmap-modal')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        </div>
+        <form action="{{ url_for('admin.roadmap') }}" method="POST" class="space-y-3 mt-4 text-xs">
+            <div>
+                <label class="form-label">Target Title</label>
+                <input type="text" name="title" class="form-input text-xs" placeholder="e.g. Month 1: Constitution Basics" required>
+            </div>
+            <div>
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input text-xs" rows="2"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Year Number</label>
+                    <input type="number" name="year" class="form-input text-xs" value="1" required>
+                </div>
+                <div>
+                    <label class="form-label">Month Number</label>
+                    <input type="number" name="month" class="form-input text-xs" value="1" required>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Subject (Optional)</label>
+                    <select name="subject_id" class="form-input text-xs">
+                        <option value="">None</option>
+                        {% for sub in subjects %}
+                        <option value="{{ sub.id }}">{{ sub.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Linked Lesson (Optional)</label>
+                    <select name="lesson_id" class="form-input text-xs">
+                        <option value="">None</option>
+                        {% for les in lessons %}
+                        <option value="{{ les.id }}">{{ les.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Target Date</label>
+                    <input type="date" name="target_date" class="form-input text-xs">
+                </div>
+                <div>
+                    <label class="form-label">Est. Study Time</label>
+                    <input type="text" name="estimated_study_time" class="form-input text-xs" value="10 hours" required>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Priority</label>
+                    <select name="priority" class="form-input text-xs" required>
+                        <option value="high">High</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Display Order</label>
+                    <input type="number" name="order_index" class="form-input text-xs" value="1" required>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeModal('add-roadmap-modal')" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Target</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

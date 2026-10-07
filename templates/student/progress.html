@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Progress Analytics{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100">Performance &amp; Accuracy Breakdown</h1>
+        <p class="text-sm text-slate-400 mt-1">Empirical accuracy data calculated directly from your quiz attempts and completed lessons.</p>
+    </div>
+
+    <!-- Overview Stats Header -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="stat-card">
+            <span class="text-xs font-semibold uppercase text-slate-400">Total Quizzes</span>
+            <div class="text-2xl font-extrabold text-slate-100 mt-1">{{ total_quizzes }}</div>
+        </div>
+        <div class="stat-card">
+            <span class="text-xs font-semibold uppercase text-slate-400">Questions Answered</span>
+            <div class="text-2xl font-extrabold text-indigo-400 mt-1">{{ total_q_attempted }}</div>
+        </div>
+        <div class="stat-card">
+            <span class="text-xs font-semibold uppercase text-slate-400">Correct Answers</span>
+            <div class="text-2xl font-extrabold text-emerald-400 mt-1">{{ total_q_correct }}</div>
+        </div>
+        <div class="stat-card">
+            <span class="text-xs font-semibold uppercase text-slate-400">Global Accuracy</span>
+            <div class="text-2xl font-extrabold text-purple-400 mt-1">{{ overall_accuracy }}%</div>
+        </div>
+    </div>
+
+    <!-- Subject Accuracy Table -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <h2 class="text-lg font-bold text-slate-100 mb-4">Subject Mastery Breakdown</h2>
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Lessons Completed</th>
+                        <th>Quiz Questions</th>
+                        <th>Accuracy Rate</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for st in subject_stats %}
+                    <tr>
+                        <td>
+                            <div class="font-bold text-slate-200">{{ st.subject.name }}</div>
+                            <div class="text-xs text-slate-400">{{ st.subject.code }}</div>
+                        </td>
+                        <td>
+                            <span class="text-slate-200 font-semibold">{{ st.completed_lessons }}</span> / {{ st.total_lessons }}
+                        </td>
+                        <td>
+                            <span class="text-slate-200 font-semibold">{{ st.correct_ans }}</span> / {{ st.total_ans }}
+                        </td>
+                        <td>
+                            <span class="font-extrabold {% if st.accuracy >= 70 %}text-emerald-400{% elif st.accuracy >= 50 %}text-amber-400{% else %}text-rose-400{% endif %}">
+                                {{ st.accuracy }}%
+                            </span>
+                        </td>
+                        <td class="w-48">
+                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ st.lesson_pct }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-6 text-slate-400">No subject stats recorded yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Syllabus Subjects{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Group 2A Subjects Catalog</h1>
+            <p class="text-sm text-slate-400 mt-1">Select a subject to explore topics, lessons, concepts, and practice quizzes.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in subject_data %}
+        <div class="card p-6 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition rounded-2xl flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono font-bold text-xs">
+                        {{ item.subject.code }}
+                    </span>
+                    <span class="badge badge-indigo text-xs">{{ item.progress_pct }}% Done</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-100 mb-2">{{ item.subject.name }}</h2>
+                <p class="text-slate-400 text-sm mb-4 line-clamp-2">{{ item.subject.description or 'Complete subject syllabus coverage for TNPSC Group 2A.' }}</p>
+            </div>
+
+            <div>
+                <div class="space-y-2 mb-4 pt-4 border-t border-slate-800 text-xs text-slate-400">
+                    <div class="flex justify-between">
+                        <span>Topics Count:</span>
+                        <strong class="text-slate-200">{{ item.topics_count }} Topics</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Lessons Progress:</span>
+                        <strong class="text-slate-200">{{ item.completed_lessons }} / {{ item.total_lessons }} Completed</strong>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mt-1">
+                        <div class="bg-indigo-500 h-1.5 rounded-full" style="width: {{ item.progress_pct }}%"></div>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('student.topics', subject_id=item.subject.id) }}" class="btn btn-primary w-full text-center">
+                    Explore Topics &rarr;
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-span-full card p-12 text-center text-slate-400">
+            No active subjects found in the database.
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

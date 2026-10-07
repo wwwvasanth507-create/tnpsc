@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}Manage Subjects{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Subject Management</h1>
+            <p class="text-sm text-slate-400 mt-1">Create, edit, reorder, or toggle active status of Group 2A subjects.</p>
+        </div>
+        <button type="button" onclick="openModal('add-subject-modal')" class="btn btn-primary font-bold">
+            + Add New Subject
+        </button>
+    </div>
+
+    <!-- Subjects List Table -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Subject Name</th>
+                        <th>Code</th>
+                        <th>Topics</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for sub in subjects %}
+                    <tr>
+                        <td class="font-mono text-slate-400">{{ sub.order_index }}</td>
+                        <td>
+                            <div class="font-bold text-slate-100">{{ sub.name }}</div>
+                            <div class="text-xs text-slate-400 line-clamp-1">{{ sub.description }}</div>
+                        </td>
+                        <td><code class="text-indigo-400 font-bold">{{ sub.code }}</code></td>
+                        <td><span class="badge badge-indigo">{{ sub.topics|length }} Topics</span></td>
+                        <td>
+                            {% if sub.is_active %}
+                                <span class="badge badge-emerald">Active</span>
+                            {% else %}
+                                <span class="badge badge-rose">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" onclick="editSubject('{{ sub.id }}', '{{ sub.name|escape }}', '{{ sub.code }}', '{{ sub.description|escape }}', '{{ sub.order_index }}', {{ 'true' if sub.is_active else 'false' }})" class="btn btn-ghost btn-sm">Edit</button>
+                                <form action="{{ url_for('admin.delete_subject', subject_id=sub.id) }}" method="POST" onsubmit="return confirm('Delete this subject and all connected topics?')">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No subjects created yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Subject -->
+<div id="add-subject-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-bold text-slate-100">Create New Subject</h3>
+            <button type="button" onclick="closeModal('add-subject-modal')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        </div>
+        <form action="{{ url_for('admin.subjects') }}" method="POST" class="space-y-4 mt-4">
+            <div>
+                <label class="form-label">Subject Name</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g. Indian Polity" required>
+            </div>
+            <div>
+                <label class="form-label">Subject Code</label>
+                <input type="text" name="code" class="form-input" placeholder="e.g. POLITY" required>
+            </div>
+            <div>
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input" rows="3" placeholder="Syllabus overview..."></textarea>
+            </div>
+            <div>
+                <label class="form-label">Display Order</label>
+                <input type="number" name="order_index" class="form-input" value="1" required>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeModal('add-subject-modal')" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Subject</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Subject -->
+<div id="edit-subject-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-bold text-slate-100">Edit Subject</h3>
+            <button type="button" onclick="closeModal('edit-subject-modal')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        </div>
+        <form id="edit-subject-form" method="POST" class="space-y-4 mt-4">
+            <div>
+                <label class="form-label">Subject Name</label>
+                <input type="text" id="edit-name" name="name" class="form-input" required>
+            </div>
+            <div>
+                <label class="form-label">Subject Code</label>
+                <input type="text" id="edit-code" name="code" class="form-input" required>
+            </div>
+            <div>
+                <label class="form-label">Description</label>
+                <textarea id="edit-description" name="description" class="form-input" rows="3"></textarea>
+            </div>
+            <div>
+                <label class="form-label">Display Order</label>
+                <input type="number" id="edit-order" name="order_index" class="form-input" required>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="edit-active" name="is_active" class="mr-2">
+                <label for="edit-active" class="text-sm font-semibold text-slate-200">Is Active</label>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeModal('edit-subject-modal')" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

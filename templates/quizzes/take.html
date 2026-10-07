@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Taking Quiz: {{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6" id="quiz-container" data-quiz-id="{{ quiz.id }}" data-time-limit="{{ quiz.time_limit_minutes }}">
+    <!-- Top Timer & Header Bar -->
+    <div class="card p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-slate-100">{{ quiz.title }}</h1>
+            <p class="text-xs text-slate-400">Total Questions: <span id="total-q-count">{{ questions|length }}</span> &bull; Pass Mark: {{ quiz.pass_percentage }}%</p>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+            <span class="text-xs text-slate-400 font-semibold uppercase">Time Remaining:</span>
+            <span id="quiz-timer" class="text-xl font-extrabold font-mono text-amber-400">00:00</span>
+        </div>
+    </div>
+
+    <!-- Question Box Cards -->
+    <form id="quiz-form" action="{{ url_for('quizzes.submit_quiz', quiz_id=quiz.id) }}" method="POST">
+        <div id="questions-wrapper">
+        {% for q in questions %}
+            <div class="question-card card p-6 md:p-8 bg-slate-900 border border-slate-800 rounded-2xl space-y-6 {% if not loop.first %}hidden{% endif %}" data-index="{{ loop.index0 }}" data-question-id="{{ q.id }}">
+                <div class="flex items-center justify-between text-xs text-slate-400 pb-4 border-b border-slate-800">
+                    <span class="badge badge-indigo">Question {{ loop.index }} of {{ questions|length }}</span>
+                    <span class="uppercase">Difficulty: {{ q.difficulty }}</span>
+                </div>
+
+                <div class="text-lg font-bold text-slate-100 leading-snug">
+                    {{ q.question_text }}
+                </div>
+
+                <div class="space-y-3">
+                    <label class="option-card flex items-center p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="radio" name="q_{{ q.id }}" value="A" class="option-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4 bg-slate-900 border-slate-700">
+                        <span class="ml-3 text-sm text-slate-200"><strong class="text-indigo-400 mr-2">A.</strong> {{ q.option_a }}</span>
+                    </label>
+
+                    <label class="option-card flex items-center p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="radio" name="q_{{ q.id }}" value="B" class="option-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4 bg-slate-900 border-slate-700">
+                        <span class="ml-3 text-sm text-slate-200"><strong class="text-indigo-400 mr-2">B.</strong> {{ q.option_b }}</span>
+                    </label>
+
+                    <label class="option-card flex items-center p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="radio" name="q_{{ q.id }}" value="C" class="option-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4 bg-slate-900 border-slate-700">
+                        <span class="ml-3 text-sm text-slate-200"><strong class="text-indigo-400 mr-2">C.</strong> {{ q.option_c }}</span>
+                    </label>
+
+                    <label class="option-card flex items-center p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="radio" name="q_{{ q.id }}" value="D" class="option-radio text-indigo-600 focus:ring-indigo-500 h-4 w-4 bg-slate-900 border-slate-700">
+                        <span class="ml-3 text-sm text-slate-200"><strong class="text-indigo-400 mr-2">D.</strong> {{ q.option_d }}</span>
+                    </label>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+        <!-- Navigation Controls & Submission Bar -->
+        <div class="card p-5 bg-slate-900 border border-slate-800 rounded-2xl mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <button type="button" id="prev-btn" class="btn btn-ghost btn-sm disabled:opacity-50" disabled>&larr; Previous</button>
+                <button type="button" id="next-btn" class="btn btn-primary btn-sm">Next Question &rarr;</button>
+            </div>
+
+            <!-- Question Number Indicator Pills -->
+            <div class="flex items-center space-x-1.5 overflow-x-auto max-w-full py-1">
+                {% for q in questions %}
+                <button type="button" class="q-nav-pill w-8 h-8 rounded-lg text-xs font-bold border border-slate-800 bg-slate-950 text-slate-400 hover:border-indigo-500 transition {% if loop.first %}active border-indigo-500 text-indigo-400 bg-indigo-950/40{% endif %}" data-target="{{ loop.index0 }}">
+                    {{ loop.index }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="submit-quiz-btn" class="btn btn-outline-success font-bold py-2 px-5">Submit Quiz Answers</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endblock %}

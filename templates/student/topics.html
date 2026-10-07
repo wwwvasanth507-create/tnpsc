@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ subject.name }} - Topics{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center space-x-2 text-sm text-slate-400">
+        <a href="{{ url_for('student.subjects') }}" class="hover:text-indigo-400">Subjects</a>
+        <span>&rsaquo;</span>
+        <span class="text-slate-200 font-semibold">{{ subject.name }}</span>
+    </div>
+
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100">{{ subject.name }} Topics</h1>
+        <p class="text-sm text-slate-400 mt-1">{{ subject.description }}</p>
+    </div>
+
+    <div class="space-y-6">
+    {% for topic in topics %}
+        <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <span class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Topic {{ loop.index }}</span>
+                    <h2 class="text-xl font-bold text-slate-100 mt-0.5">{{ topic.title }}</h2>
+                </div>
+                <span class="badge badge-indigo text-xs">{{ topic.lessons|length }} Lessons</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">{{ topic.description }}</p>
+
+            <div class="space-y-2.5 pt-4 border-t border-slate-800">
+                <h3 class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Lessons in this topic:</h3>
+                {% for lesson in topic.lessons if lesson.is_active %}
+                    <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between hover:border-slate-700 transition">
+                        <div class="flex items-center space-x-3">
+                            {% if lesson.id in completed_lesson_ids %}
+                                <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">✓</div>
+                            {% else %}
+                                <div class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold">{{ loop.index }}</div>
+                            {% endif %}
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-200">{{ lesson.title }}</h4>
+                                <p class="text-xs text-slate-400 line-clamp-1">{{ lesson.content_summary }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xs text-slate-400 hidden sm:inline">{{ lesson.estimated_minutes }} mins</span>
+                            <a href="{{ url_for('lessons.detail', lesson_id=lesson.id) }}" class="btn btn-outline-primary btn-sm">Read Lesson</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-xs text-slate-400 italic">No lessons published yet in this topic.</p>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="card p-12 text-center text-slate-400">
+            No topics created for this subject yet.
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

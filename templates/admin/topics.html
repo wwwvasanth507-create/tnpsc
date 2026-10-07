@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Manage Topics{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Topic Management</h1>
+            <p class="text-sm text-slate-400 mt-1">Organize curriculum topics under subjects.</p>
+        </div>
+        <button type="button" onclick="openModal('add-topic-modal')" class="btn btn-primary font-bold">
+            + Add New Topic
+        </button>
+    </div>
+
+    <!-- Topics Table -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Order</th>
+                        <th>Topic Title</th>
+                        <th>Lessons</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for top in topics %}
+                    <tr>
+                        <td><span class="badge badge-indigo text-xs font-bold">{{ top.subject.name if top.subject else 'None' }}</span></td>
+                        <td class="font-mono text-slate-400">{{ top.order_index }}</td>
+                        <td>
+                            <div class="font-bold text-slate-100">{{ top.title }}</div>
+                            <div class="text-xs text-slate-400 line-clamp-1">{{ top.description }}</div>
+                        </td>
+                        <td><span class="badge badge-purple">{{ top.lessons|length }} Lessons</span></td>
+                        <td>
+                            {% if top.is_active %}<span class="badge badge-emerald">Active</span>{% else %}<span class="badge badge-rose">Inactive</span>{% endif %}
+                        </td>
+                        <td>
+                            <div class="flex items-center space-x-2">
+                                <form action="{{ url_for('admin.delete_topic', topic_id=top.id) }}" method="POST" onsubmit="return confirm('Delete topic?')">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No topics created yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Topic -->
+<div id="add-topic-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-bold text-slate-100">Create New Topic</h3>
+            <button type="button" onclick="closeModal('add-topic-modal')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        </div>
+        <form action="{{ url_for('admin.topics') }}" method="POST" class="space-y-4 mt-4">
+            <div>
+                <label class="form-label">Parent Subject</label>
+                <select name="subject_id" class="form-input" required>
+                    {% for sub in subjects %}
+                    <option value="{{ sub.id }}">{{ sub.name }} ({{ sub.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Topic Title</label>
+                <input type="text" name="title" class="form-input" placeholder="e.g. Constitution Basics" required>
+            </div>
+            <div>
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input" rows="2"></textarea>
+            </div>
+            <div>
+                <label class="form-label">Display Order</label>
+                <input type="number" name="order_index" class="form-input" value="1" required>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeModal('add-topic-modal')" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Topic</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,5 @@
+/* Admin Control Panel Enhancements */
+.admin-card-hover:hover {
+    border-color: #6366f1;
+    transform: translateY(-2px);
+}

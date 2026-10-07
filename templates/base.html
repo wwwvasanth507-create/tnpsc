@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TNPSC 2A MASTER{% endblock %} | Personal Exam Preparation Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SVG Icon System Inline & Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% if current_user_role == 'admin' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% else %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+    {% endif %}
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <header class="navbar sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="{% if is_logged_in %}{% if current_user_role == 'admin' %}{{ url_for('admin.dashboard') }}{% else %}{{ url_for('student.dashboard') }}{% endif %}{% else %}{{ url_for('auth.login') }}{% endif %}" class="flex items-center space-x-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                            <span class="text-white font-extrabold text-xl tracking-wider">2A</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-lg text-slate-100 tracking-tight leading-none">TNPSC <span class="text-indigo-400">2A MASTER</span></span>
+                            <span class="text-xs text-slate-400 font-medium tracking-wider">GROUP 2A PREPARATION</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                {% if is_logged_in %}
+                <nav class="hidden md:flex items-center space-x-1">
+                    {% if current_user_role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">Dashboard</a>
+                        <a href="{{ url_for('admin.subjects') }}" class="nav-link {% if 'subjects' in request.endpoint %}active{% endif %}">Subjects</a>
+                        <a href="{{ url_for('admin.topics') }}" class="nav-link {% if 'topics' in request.endpoint %}active{% endif %}">Topics</a>
+                        <a href="{{ url_for('admin.lessons') }}" class="nav-link {% if 'lessons' in request.endpoint %}active{% endif %}">Lessons</a>
+                        <a href="{{ url_for('admin.questions') }}" class="nav-link {% if 'questions' in request.endpoint %}active{% endif %}">Questions</a>
+                        <a href="{{ url_for('admin.quizzes') }}" class="nav-link {% if 'quizzes' in request.endpoint %}active{% endif %}">Quizzes</a>
+                        <a href="{{ url_for('admin.roadmap') }}" class="nav-link {% if 'roadmap' in request.endpoint %}active{% endif %}">Roadmap</a>
+                        <a href="{{ url_for('admin.students') }}" class="nav-link {% if 'students' in request.endpoint %}active{% endif %}">Students</a>
+                        <a href="{{ url_for('admin.audit_logs') }}" class="nav-link {% if 'audit_logs' in request.endpoint %}active{% endif %}">Audit Logs</a>
+                    {% else %}
+                        <a href="{{ url_for('student.dashboard') }}" class="nav-link {% if request.endpoint == 'student.dashboard' %}active{% endif %}">Dashboard</a>
+                        <a href="{{ url_for('student.roadmap') }}" class="nav-link {% if request.endpoint == 'student.roadmap' %}active{% endif %}">Roadmap</a>
+                        <a href="{{ url_for('student.subjects') }}" class="nav-link {% if request.endpoint == 'student.subjects' or 'topics' in request.endpoint %}active{% endif %}">Subjects</a>
+                        <a href="{{ url_for('quizzes.list_quizzes') }}" class="nav-link {% if 'quizzes' in request.endpoint %}active{% endif %}">Quizzes</a>
+                        <a href="{{ url_for('student.mistakes') }}" class="nav-link {% if request.endpoint == 'student.mistakes' %}active{% endif %}">Mistakes</a>
+                        <a href="{{ url_for('student.bookmarks') }}" class="nav-link {% if request.endpoint == 'student.bookmarks' %}active{% endif %}">Bookmarks</a>
+                        <a href="{{ url_for('progress.index') }}" class="nav-link {% if 'progress' in request.endpoint %}active{% endif %}">Progress</a>
+                    {% endif %}
+                </nav>
+                {% endif %}
+
+                <!-- User Controls / Auth Buttons -->
+                <div class="hidden md:flex items-center space-x-3">
+                    {% if is_logged_in %}
+                        <div class="flex items-center space-x-3 pl-3 border-l border-slate-800">
+                            <a href="{{ url_for('student.profile') }}" class="flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700/60 text-sm font-medium transition">
+                                <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                    {{ current_user_name[0] if current_user_name else 'U' }}
+                                </div>
+                                <span class="text-slate-200">{{ current_user_name }}</span>
+                                <span class="badge badge-indigo text-xs uppercase ml-1">{{ current_user_role }}</span>
+                            </a>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Sign In</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Register Free</a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex md:hidden items-center">
+                    <button id="mobile-menu-toggle" type="button" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none" aria-label="Toggle Navigation">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-slate-900/95 border-b border-slate-800 px-4 pt-2 pb-4 space-y-1">
+            {% if is_logged_in %}
+                {% if current_user_role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="mobile-nav-link">Dashboard</a>
+                    <a href="{{ url_for('admin.subjects') }}" class="mobile-nav-link">Subjects</a>
+                    <a href="{{ url_for('admin.topics') }}" class="mobile-nav-link">Topics</a>
+                    <a href="{{ url_for('admin.lessons') }}" class="mobile-nav-link">Lessons</a>
+                    <a href="{{ url_for('admin.questions') }}" class="mobile-nav-link">Questions</a>
+                    <a href="{{ url_for('admin.quizzes') }}" class="mobile-nav-link">Quizzes</a>
+                    <a href="{{ url_for('admin.roadmap') }}" class="mobile-nav-link">Roadmap</a>
+                    <a href="{{ url_for('admin.students') }}" class="mobile-nav-link">Students</a>
+                    <a href="{{ url_for('admin.audit_logs') }}" class="mobile-nav-link">Audit Logs</a>
+                {% else %}
+                    <a href="{{ url_for('student.dashboard') }}" class="mobile-nav-link">Dashboard</a>
+                    <a href="{{ url_for('student.roadmap') }}" class="mobile-nav-link">Roadmap</a>
+                    <a href="{{ url_for('student.subjects') }}" class="mobile-nav-link">Subjects</a>
+                    <a href="{{ url_for('quizzes.list_quizzes') }}" class="mobile-nav-link">Quizzes</a>
+                    <a href="{{ url_for('student.mistakes') }}" class="mobile-nav-link">Mistakes</a>
+                    <a href="{{ url_for('student.bookmarks') }}" class="mobile-nav-link">Bookmarks</a>
+                    <a href="{{ url_for('progress.index') }}" class="mobile-nav-link">Progress</a>
+                {% endif %}
+                <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-sm font-medium text-slate-300">{{ current_user_name }} ({{ current_user_role }})</span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+                </div>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="mobile-nav-link">Sign In</a>
+                <a href="{{ url_for('auth.register') }}" class="mobile-nav-link">Register Free</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Flash Alert Banners -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} flex items-center justify-between mb-3 shadow-lg rounded-xl">
+                        <span>{{ message }}</span>
+                        <button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-70 hover:opacity-100 font-bold">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Body Container -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-900/60 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-slate-400 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="font-semibold text-slate-200">TNPSC 2A MASTER</span> &copy; {{ now.year }} Personal Exam Preparation Platform.
+            </div>
+            <div class="mt-2 md:mt-0 flex items-center space-x-4 text-xs">
+                <span>Built with Python 3, Flask &amp; PostgreSQL</span>
+                <span class="text-indigo-400 font-medium">100% Native Pure JS/CSS</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Vanilla Javascript Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}User Profile{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto space-y-6">
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100">Student Profile &amp; Settings</h1>
+        <p class="text-sm text-slate-400 mt-1">Manage your account details and password.</p>
+    </div>
+
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <form action="{{ url_for('student.profile') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="form-label">Username (Immutable)</label>
+                <input type="text" class="form-input bg-slate-950 text-slate-400 cursor-not-allowed" value="{{ user.username }}" readonly>
+            </div>
+
+            <div>
+                <label class="form-label">Email Address (Immutable)</label>
+                <input type="email" class="form-input bg-slate-950 text-slate-400 cursor-not-allowed" value="{{ user.email }}" readonly>
+            </div>
+
+            <div>
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" id="full_name" name="full_name" class="form-input" value="{{ user.full_name }}" required>
+            </div>
+
+            <hr class="border-slate-800 my-4">
+            <h3 class="text-sm font-bold text-slate-200">Change Password (Optional)</h3>
+
+            <div>
+                <label for="new_password" class="form-label">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="form-input" placeholder="Leave blank to keep unchanged" minlength="6">
+            </div>
+
+            <div>
+                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Re-enter new password" minlength="6">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full py-2.5 font-semibold">
+                Save Profile Updates
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

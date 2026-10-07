@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Available Quizzes{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100">Practice Quizzes</h1>
+        <p class="text-sm text-slate-400 mt-1">Test your mastery with timed multiple-choice question sets.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for quiz in quizzes %}
+        {% set last_att = attempt_map.get(quiz.id) %}
+        <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3 text-xs">
+                    <span class="badge badge-indigo">{{ quiz.subject.name if quiz.subject else 'General' }}</span>
+                    <span class="text-slate-400">⏱ {{ quiz.time_limit_minutes }} Mins</span>
+                </div>
+                <h2 class="text-lg font-bold text-slate-100 mb-2">{{ quiz.title }}</h2>
+                <p class="text-slate-400 text-sm mb-4 line-clamp-2">{{ quiz.description or 'Multiple choice question test set.' }}</p>
+            </div>
+
+            <div>
+                <div class="pt-3 border-t border-slate-800 mb-4 flex items-center justify-between text-xs text-slate-400">
+                    <span>Pass Threshold: <strong class="text-slate-200">{{ quiz.pass_percentage }}%</strong></span>
+                    {% if last_att %}
+                        <span class="font-bold {% if last_att.percentage >= quiz.pass_percentage %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                            Last: {{ last_att.percentage }}%
+                        </span>
+                    {% else %}
+                        <span class="text-slate-400">Unattempted</span>
+                    {% endif %}
+                </div>
+
+                <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id) }}" class="btn btn-primary w-full text-center">
+                    Start Quiz Now &rarr;
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-span-full card p-12 text-center text-slate-400">
+            No practice quizzes published yet. Admin will create quiz sets.
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

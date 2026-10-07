@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <!-- Top Welcome Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900/60 via-slate-900 to-slate-900 border border-indigo-500/20 p-6 md:p-8 shadow-xl">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    TNPSC Group 2A Active Preparation
+                </span>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight">
+                    Welcome back, {{ user.full_name }}! 👋
+                </h1>
+                <p class="text-slate-400 text-sm md:text-base mt-1 max-w-2xl">
+                    Keep your momentum strong. Track your mastery, revise weak areas, and conquer your target syllabus.
+                </p>
+            </div>
+            {% if next_lesson %}
+            <div class="flex-shrink-0">
+                <a href="{{ url_for('lessons.detail', lesson_id=next_lesson.id) }}" class="btn btn-primary px-5 py-3 text-base font-bold shadow-lg shadow-indigo-600/30 flex items-center space-x-2">
+                    <span>Continue Learning</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Overview Stat Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Prep Percentage -->
+        <div class="stat-card">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                <span>Overall Preparation</span>
+                <span class="text-indigo-400 font-bold">{{ overall_prep_pct }}%</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-slate-100 mb-2">
+                {{ completed_lessons_count }} <span class="text-sm font-medium text-slate-400">/ {{ total_lessons_count }} Lessons</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500" style="width: {{ overall_prep_pct }}%"></div>
+            </div>
+        </div>
+
+        <!-- Study Streak -->
+        <div class="stat-card">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                <span>Study Streak</span>
+                <span class="text-amber-400">🔥 Active</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-amber-400 mb-1">
+                {{ streak }} <span class="text-sm font-medium text-slate-400">Days</span>
+            </div>
+            <p class="text-xs text-slate-400">Consistency is key for Group 2A rank</p>
+        </div>
+
+        <!-- Questions Attempted -->
+        <div class="stat-card">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                <span>Questions Attempted</span>
+                <span class="text-emerald-400 font-bold">MCQs</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-slate-100 mb-1">
+                {{ questions_attempted }}
+            </div>
+            <p class="text-xs text-slate-400">Across all completed quizzes</p>
+        </div>
+
+        <!-- Average Quiz Score -->
+        <div class="stat-card">
+            <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                <span>Average Quiz Score</span>
+                <span class="text-purple-400 font-bold">% Score</span>
+            </div>
+            <div class="text-2xl md:text-3xl font-extrabold text-purple-400 mb-1">
+                {{ avg_score }}%
+            </div>
+            <p class="text-xs text-slate-400">Target accuracy: 80%+</p>
+        </div>
+    </div>
+
+    <!-- Main Grid Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column: Recommended Next & Roadmap & Goals -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Next Recommended Lesson Card -->
+            {% if next_lesson %}
+            <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="badge badge-indigo">Recommended Next Lesson</span>
+                    <span class="text-xs text-slate-400">Estimated: {{ next_lesson.estimated_minutes }} mins</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-100 mb-2">{{ next_lesson.title }}</h2>
+                <p class="text-slate-400 text-sm mb-4 line-clamp-2">{{ next_lesson.content_summary }}</p>
+                <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                    <div class="text-xs text-slate-400">
+                        Topic: <span class="text-slate-200 font-semibold">{{ next_lesson.topic.title if next_lesson.topic else 'General' }}</span>
+                    </div>
+                    <a href="{{ url_for('lessons.detail', lesson_id=next_lesson.id) }}" class="btn btn-primary btn-sm">
+                        Start Lesson &rarr;
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Daily & Weekly Goal Tracker -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="card p-5 bg-slate-900/80 border border-slate-800 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-bold text-slate-200">Daily Study Goal</span>
+                        <span class="text-xs font-semibold text-indigo-400">{{ today_completed }} / {{ daily_goal_target }} Lessons</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-indigo-500 h-2.5 rounded-full" style="width: {{ (today_completed / daily_goal_target * 100) if daily_goal_target > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+
+                <div class="card p-5 bg-slate-900/80 border border-slate-800 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-bold text-slate-200">Weekly Target</span>
+                        <span class="text-xs font-semibold text-purple-400">{{ week_completed }} / {{ weekly_goal_target }} Lessons</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-purple-500 h-2.5 rounded-full" style="width: {{ (week_completed / weekly_goal_target * 100) if weekly_goal_target > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Quiz Results -->
+            <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-slate-100">Recent Quiz Performance</h2>
+                    <a href="{{ url_for('quizzes.list_quizzes') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">View All Quizzes &rarr;</a>
+                </div>
+
+                {% if recent_attempts %}
+                <div class="space-y-3">
+                    {% for att in recent_attempts %}
+                    <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">{{ att.quiz_set.title if att.quiz_set else 'Practice Quiz' }}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">
+                                {{ att.correct_count }}/{{ att.total_questions }} Correct &bull; {{ att.completed_at.strftime('%b %d, %Y') if att.completed_at else '' }}
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-base font-extrabold {% if att.percentage >= 60 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                                {{ att.percentage }}%
+                            </span>
+                            <a href="{{ url_for('quizzes.view_attempt', attempt_id=att.id) }}" class="btn btn-ghost btn-sm text-xs">Review</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-6 text-slate-400 text-sm">
+                    No quizzes attempted yet. Take your first quiz to track accuracy!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: Weak Topics & Current Roadmap Position -->
+        <div class="space-y-6">
+            <!-- Current Roadmap Position Card -->
+            <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-slate-100">Current Roadmap Step</h2>
+                    <a href="{{ url_for('student.roadmap') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">Roadmap &rarr;</a>
+                </div>
+                {% if current_roadmap %}
+                <div class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/20">
+                    <span class="badge badge-indigo text-xs mb-2">Year {{ current_roadmap.year }} &bull; Month {{ current_roadmap.month }}</span>
+                    <h3 class="text-base font-bold text-slate-100 mb-1">{{ current_roadmap.title }}</h3>
+                    <p class="text-xs text-slate-400 mb-3">{{ current_roadmap.description }}</p>
+                    <div class="flex items-center justify-between text-xs text-slate-300">
+                        <span>Target: {{ current_roadmap.target_date or 'Ongoing' }}</span>
+                        <span class="font-semibold text-indigo-400">{{ current_roadmap.estimated_study_time }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-sm text-slate-400">Roadmap item will appear here.</p>
+                {% endif %}
+            </div>
+
+            <!-- Weak Subjects & Topics -->
+            <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+                <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center justify-between">
+                    <span>Weak Areas Needing Revision</span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                </h2>
+
+                {% if weak_topics %}
+                <div class="space-y-3">
+                    {% for wt in weak_topics %}
+                    <div class="p-3 rounded-xl bg-rose-950/20 border border-rose-500/20 flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">{{ wt.title }}</div>
+                            <div class="text-xs text-slate-400">{{ wt.subject }}</div>
+                        </div>
+                        <span class="badge badge-rose text-xs font-bold">{{ wt.wrong_count }} Wrong</span>
+                    </div>
+                    {% endfor %}
+                    <a href="{{ url_for('student.mistakes') }}" class="btn btn-outline-danger btn-sm w-full mt-2 text-center block">
+                        Review Mistake Bank &rarr;
+                    </a>
+                </div>
+                {% else %}
+                <div class="text-center py-6 text-slate-400 text-sm">
+                    No weak topics identified yet. Great job!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

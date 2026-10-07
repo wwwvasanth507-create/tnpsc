@@ -1,0 +1,14 @@
+/* Student Dashboard & Reader Enhancements */
+.option-card:hover {
+    background-color: rgba(30, 41, 59, 0.8);
+}
+
+.option-radio:checked + span {
+    color: #818cf8;
+    font-weight: 700;
+}
+
+.option-card.selected {
+    border-color: #6366f1;
+    background-color: rgba(99, 102, 241, 0.15);
+}

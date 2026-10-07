@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Administrator Control Center</h1>
+            <p class="text-sm text-slate-400 mt-1">Real-time content management, student monitoring, and system metrics.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="{{ url_for('admin.subjects') }}" class="btn btn-primary btn-sm">+ Manage Content</a>
+            <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-ghost btn-sm">Audit Log</a>
+        </div>
+    </div>
+
+    <!-- Admin Metric Stat Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="stat-card">
+            <span class="text-xs font-semibold text-slate-400 uppercase">Total Students</span>
+            <div class="text-2xl font-extrabold text-slate-100 mt-1">{{ total_students }}</div>
+            <span class="text-xs text-emerald-400 font-medium">{{ active_students }} Active</span>
+        </div>
+        <div class="stat-card">
+            <span class="text-xs font-semibold text-slate-400 uppercase">Subjects / Topics</span>
+            <div class="text-2xl font-extrabold text-indigo-400 mt-1">{{ total_subjects }} / {{ total_topics }}</div>
+            <span class="text-xs text-slate-400 font-medium">Curriculum Structure</span>
+        </div>
+        <div class="stat-card">
+            <span class="text-xs font-semibold text-slate-400 uppercase">Lessons / Questions</span>
+            <div class="text-2xl font-extrabold text-purple-400 mt-1">{{ total_lessons }} / {{ total_questions }}</div>
+            <span class="text-xs text-slate-400 font-medium">Question Bank</span>
+        </div>
+        <div class="stat-card">
+            <span class="text-xs font-semibold text-slate-400 uppercase">Quiz Attempts</span>
+            <div class="text-2xl font-extrabold text-amber-400 mt-1">{{ total_attempts }}</div>
+            <span class="text-xs text-slate-400 font-medium">Avg Score: {{ avg_quiz_score }}%</span>
+        </div>
+    </div>
+
+    <!-- Quick Management Navigation Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <a href="{{ url_for('admin.subjects') }}" class="card p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-center transition rounded-xl">
+            <span class="text-2xl block mb-1">📚</span>
+            <span class="text-xs font-bold text-slate-200">Subjects</span>
+        </a>
+        <a href="{{ url_for('admin.topics') }}" class="card p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-center transition rounded-xl">
+            <span class="text-2xl block mb-1">📑</span>
+            <span class="text-xs font-bold text-slate-200">Topics</span>
+        </a>
+        <a href="{{ url_for('admin.lessons') }}" class="card p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-center transition rounded-xl">
+            <span class="text-2xl block mb-1">📖</span>
+            <span class="text-xs font-bold text-slate-200">Lessons</span>
+        </a>
+        <a href="{{ url_for('admin.questions') }}" class="card p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-center transition rounded-xl">
+            <span class="text-2xl block mb-1">❓</span>
+            <span class="text-xs font-bold text-slate-200">Questions</span>
+        </a>
+        <a href="{{ url_for('admin.quizzes') }}" class="card p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-center transition rounded-xl">
+            <span class="text-2xl block mb-1">✍️</span>
+            <span class="text-xs font-bold text-slate-200">Quizzes</span>
+        </a>
+        <a href="{{ url_for('admin.roadmap') }}" class="card p-4 bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-center transition rounded-xl">
+            <span class="text-2xl block mb-1">🗺️</span>
+            <span class="text-xs font-bold text-slate-200">Roadmap</span>
+        </a>
+    </div>
+
+    <!-- Recent Audit Logs Table -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-100">Recent Admin Modifications (Audit Log)</h2>
+            <a href="{{ url_for('admin.audit_logs') }}" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">View Full Audit History &rarr;</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Action</th>
+                        <th>Target</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for log in recent_logs %}
+                    <tr>
+                        <td class="text-xs font-mono text-slate-400">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td><span class="badge badge-indigo text-xs font-bold">{{ log.action }}</span></td>
+                        <td class="text-slate-200 font-semibold text-xs">{{ log.target_type }} #{{ log.target_id or '-' }}</td>
+                        <td class="text-slate-300 text-xs">{{ log.details }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-slate-400">No audit records yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

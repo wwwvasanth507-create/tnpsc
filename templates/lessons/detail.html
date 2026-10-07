@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}{{ lesson.title }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Breadcrumbs -->
+    <div class="flex items-center space-x-2 text-sm text-slate-400">
+        <a href="{{ url_for('student.subjects') }}" class="hover:text-indigo-400">Subjects</a>
+        <span>&rsaquo;</span>
+        <a href="{{ url_for('student.topics', subject_id=lesson.topic.subject_id) }}" class="hover:text-indigo-400">{{ lesson.topic.subject.name }}</a>
+        <span>&rsaquo;</span>
+        <span class="text-slate-200 font-semibold">{{ lesson.topic.title }}</span>
+    </div>
+
+    <!-- Lesson Top Header Card -->
+    <div class="card p-6 md:p-8 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-800">
+            <div>
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="badge badge-indigo text-xs">Lesson {{ lesson.order_index }}</span>
+                    <span class="text-xs text-slate-400">&bull; {{ lesson.estimated_minutes }} mins estimated study</span>
+                    {% if is_completed %}
+                    <span class="badge badge-emerald text-xs">✓ Completed</span>
+                    {% endif %}
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-100">{{ lesson.title }}</h1>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <form action="{{ url_for('lessons.toggle_bookmark', lesson_id=lesson.id) }}" method="POST">
+                    <button type="submit" class="btn {% if is_bookmarked %}btn-secondary{% else %}btn-ghost{% endif %} btn-sm flex items-center space-x-1">
+                        <span>{% if is_bookmarked %}★ Bookmarked{% else %}☆ Bookmark{% endif %}</span>
+                    </button>
+                </form>
+
+                {% if not is_completed %}
+                <form action="{{ url_for('lessons.complete', lesson_id=lesson.id) }}" method="POST">
+                    <button type="submit" class="btn btn-primary btn-sm">Mark Complete ✓</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if lesson.content_summary %}
+        <p class="text-slate-300 text-sm md:text-base leading-relaxed italic bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 mb-6">
+            {{ lesson.content_summary }}
+        </p>
+        {% endif %}
+
+        <!-- Concept Explanation Body -->
+        <div class="prose prose-invert max-w-none space-y-4 text-slate-200 text-base leading-relaxed">
+            {{ lesson.concept_body | safe }}
+        </div>
+
+        <!-- Examples Section -->
+        {% if lesson.examples %}
+        <div class="mt-8 p-5 rounded-2xl bg-indigo-950/30 border border-indigo-500/30">
+            <h3 class="text-lg font-bold text-indigo-300 mb-2 flex items-center space-x-2">
+                <span>💡 Real-World / Simple Examples</span>
+            </h3>
+            <p class="text-slate-200 text-sm leading-relaxed whitespace-pre-line">{{ lesson.examples }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Important Points Bulletins -->
+        {% if lesson.important_points %}
+        <div class="mt-6 p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30">
+            <h3 class="text-lg font-bold text-emerald-400 mb-2 flex items-center space-x-2">
+                <span>📌 Key Points for TNPSC Group 2A</span>
+            </h3>
+            <div class="text-slate-200 text-sm leading-relaxed whitespace-pre-line font-mono">{{ lesson.important_points }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Memory Tricks Mnemonics -->
+        {% if lesson.memory_tricks %}
+        <div class="mt-6 p-5 rounded-2xl bg-purple-950/30 border border-purple-500/30">
+            <h3 class="text-lg font-bold text-purple-300 mb-2 flex items-center space-x-2">
+                <span>🧠 Memory Trick / Mnemonic</span>
+            </h3>
+            <p class="text-purple-200 text-sm leading-relaxed font-semibold italic">{{ lesson.memory_tricks }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Actions & Associated Quiz Launcher -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-slate-900/90 border border-slate-800 rounded-2xl">
+        <div class="flex items-center space-x-3 w-full sm:w-auto">
+            {% if prev_lesson %}
+                <a href="{{ url_for('lessons.detail', lesson_id=prev_lesson.id) }}" class="btn btn-ghost btn-sm flex-1 sm:flex-none">
+                    &larr; Prev Lesson
+                </a>
+            {% endif %}
+            {% if next_lesson %}
+                <a href="{{ url_for('lessons.detail', lesson_id=next_lesson.id) }}" class="btn btn-ghost btn-sm flex-1 sm:flex-none">
+                    Next Lesson &rarr;
+                </a>
+            {% endif %}
+        </div>
+
+        {% if associated_quiz %}
+            <a href="{{ url_for('quizzes.take_quiz', quiz_id=associated_quiz.id) }}" class="btn btn-primary px-6 py-3 font-bold shadow-lg shadow-indigo-600/30 w-full sm:w-auto text-center">
+                Start Topic Quiz &rarr;
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

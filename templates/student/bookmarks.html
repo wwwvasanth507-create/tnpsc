@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Bookmarked Lessons{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="pb-4 border-b border-slate-800">
+        <h1 class="text-2xl font-bold text-slate-100">Saved Bookmarks</h1>
+        <p class="text-sm text-slate-400 mt-1">Quick access to important lessons you have saved for revision.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for b in bookmarks %}
+        <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3 text-xs">
+                    <span class="badge badge-indigo">{{ b.lesson.topic.subject.name if (b.lesson.topic and b.lesson.topic.subject) else 'General' }}</span>
+                    <span class="text-slate-400">Bookmarked: {{ b.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                <h2 class="text-lg font-bold text-slate-100 mb-2">{{ b.lesson.title }}</h2>
+                <p class="text-slate-400 text-sm mb-4 line-clamp-2">{{ b.lesson.content_summary }}</p>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                <span class="text-xs text-slate-400">{{ b.lesson.estimated_minutes }} mins read</span>
+                <a href="{{ url_for('lessons.detail', lesson_id=b.lesson.id) }}" class="btn btn-primary btn-sm">Read Lesson &rarr;</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-span-full card p-12 text-center text-slate-400">
+            No lessons bookmarked yet. Click the bookmark icon on any lesson to save it here.
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

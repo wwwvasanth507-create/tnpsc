@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Preparation Roadmap{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">TNPSC Group 2A Master Roadmap</h1>
+            <p class="text-sm text-slate-400 mt-1">Structured monthly preparation timeline designed to cover all topics systematically.</p>
+        </div>
+    </div>
+
+    {% if grouped_roadmap %}
+        <div class="space-y-8">
+        {% for yr, months in grouped_roadmap.items() %}
+            <div class="space-y-6">
+                <div class="flex items-center space-x-3">
+                    <span class="px-3 py-1 rounded-lg bg-indigo-600/20 text-indigo-400 font-extrabold text-sm border border-indigo-500/30">YEAR {{ yr }}</span>
+                    <div class="h-px bg-slate-800 flex-grow"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for mo, items in months.items() %}
+                    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="badge badge-indigo">Month {{ mo }}</span>
+                            <span class="text-xs text-slate-400">{{ items|length }} Tasks</span>
+                        </div>
+
+                        <div class="space-y-4">
+                        {% for item in items %}
+                            <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-indigo-500/40 transition">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-slate-200 text-base">{{ item.title }}</h3>
+                                    <span class="badge {% if item.priority == 'high' %}badge-rose{% elif item.priority == 'medium' %}badge-amber{% else %}badge-slate{% endif %} text-xs uppercase">
+                                        {{ item.priority }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 mb-3">{{ item.description }}</p>
+
+                                <div class="flex items-center justify-between pt-3 border-t border-slate-800/60 text-xs">
+                                    <span class="text-slate-400">Est. Time: <strong class="text-slate-200">{{ item.estimated_study_time }}</strong></span>
+                                    {% if item.lesson_id %}
+                                        {% if item.lesson_id in completed_lesson_ids %}
+                                            <span class="badge badge-emerald text-xs">✓ Completed</span>
+                                        {% else %}
+                                            <a href="{{ url_for('lessons.detail', lesson_id=item.lesson_id) }}" class="btn btn-primary btn-sm text-xs">Study Lesson &rarr;</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="card p-12 text-center text-slate-400">
+            No roadmap items configured yet. Admin will add monthly roadmap targets.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

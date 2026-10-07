@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Manage Questions{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-100">Question Bank Management</h1>
+            <p class="text-sm text-slate-400 mt-1">Create, edit, and curate MCQ questions for practice quizzes.</p>
+        </div>
+        <button type="button" onclick="openModal('add-question-modal')" class="btn btn-primary font-bold">
+            + Add New Question
+        </button>
+    </div>
+
+    <!-- Questions List -->
+    <div class="card p-6 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div class="overflow-x-auto">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject / Topic</th>
+                        <th>Question Text</th>
+                        <th>Correct Option</th>
+                        <th>Difficulty</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for q in questions %}
+                    <tr>
+                        <td class="font-mono text-slate-400">#{{ q.id }}</td>
+                        <td>
+                            <div class="badge badge-indigo text-xs">{{ q.subject.name if q.subject else '' }}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">{{ q.topic.title if q.topic else '' }}</div>
+                        </td>
+                        <td class="max-w-md">
+                            <div class="font-bold text-slate-100 text-sm line-clamp-2">{{ q.question_text }}</div>
+                        </td>
+                        <td>
+                            <span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 font-extrabold text-xs">
+                                Option {{ q.correct_option }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if q.difficulty == 'easy' %}badge-emerald{% elif q.difficulty == 'medium' %}badge-amber{% else %}badge-rose{% endif %} text-xs uppercase">
+                                {{ q.difficulty }}
+                            </span>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('admin.delete_question', question_id=q.id) }}" method="POST" onsubmit="return confirm('Delete question #{{ q.id }}?')">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No questions in question bank.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Question -->
+<div id="add-question-modal" class="modal-backdrop hidden">
+    <div class="modal-card max-w-xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 class="text-lg font-bold text-slate-100">Add New Question</h3>
+            <button type="button" onclick="closeModal('add-question-modal')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        </div>
+        <form action="{{ url_for('admin.questions') }}" method="POST" class="space-y-3 mt-4 text-xs">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Subject</label>
+                    <select name="subject_id" class="form-input text-xs" required>
+                        {% for sub in subjects %}
+                        <option value="{{ sub.id }}">{{ sub.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Topic</label>
+                    <select name="topic_id" class="form-input text-xs" required>
+                        {% for top in topics %}
+                        <option value="{{ top.id }}">{{ top.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">Question Text</label>
+                <textarea name="question_text" class="form-input text-xs" rows="3" placeholder="Enter complete question statement..." required></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="form-label">Option A</label>
+                    <input type="text" name="option_a" class="form-input text-xs" required>
+                </div>
+                <div>
+                    <label class="form-label">Option B</label>
+                    <input type="text" name="option_b" class="form-input text-xs" required>
+                </div>
+                <div>
+                    <label class="form-label">Option C</label>
+                    <input type="text" name="option_c" class="form-input text-xs" required>
+                </div>
+                <div>
+                    <label class="form-label">Option D</label>
+                    <input type="text" name="option_d" class="form-input text-xs" required>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Correct Option</label>
+                    <select name="correct_option" class="form-input text-xs font-bold" required>
+                        <option value="A">Option A</option>
+                        <option value="B">Option B</option>
+                        <option value="C">Option C</option>
+                        <option value="D">Option D</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Difficulty</label>
+                    <select name="difficulty" class="form-input text-xs" required>
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label">Explanation</label>
+                <textarea name="explanation" class="form-input text-xs" rows="2" placeholder="Detailed explanation for answer..."></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeModal('add-question-modal')" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Question</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
